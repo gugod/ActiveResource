@@ -2,9 +2,16 @@ package Asynapse::ActiveResource::Base;
 use Moose;
 use MooseX::ClassAttribute;
 
+use Lingua::EN::Inflect qw(PL);
+use LWP::UserAgent;
+use URI;
+use XML::Hash;
+
 class_has 'site' => (is => "rw", isa => "Str");
 class_has 'user' => (is => "rw", isa => "Str");
 class_has 'password' => (is => "rw", isa => "Str");
+
+has 'field_attributes' => (is => "rw", isa => "HashRef");
 
 around BUILDARGS => sub {
     my $orig  = shift;
@@ -13,10 +20,6 @@ around BUILDARGS => sub {
 
     $class->$orig(%args);
 };
-
-use Lingua::EN::Inflect qw(PL);
-use LWP::UserAgent;
-use URI;
 
 sub find {
     my ($class, $id) = @_;
@@ -41,10 +44,20 @@ sub find {
         die "FAIL";
     }
 
-    my $record_xml = $response->content;
-    print STDERR $record_xml;
     my $record = $class->new;
+    $record->load_attributes_from_response( $response );
     return $record;
+}
+
+sub load_attributes_from_response {
+    my $self = shift;
+    my $response = shift;
+    my $record_xml = $response->content;
+
+    my $xc = XML::Hash->new();
+    my $hash = $xc->fromXMLStringtoHash($record_xml);
+
+    $self->field_attributes($hash);
 }
 
 sub AUTOLOAD {
@@ -56,5 +69,6 @@ sub AUTOLOAD {
 
     print STDERR "OHAI $sub: @_";
 }
+
 
 1;
