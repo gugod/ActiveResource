@@ -1,6 +1,8 @@
 use inc::Module::Install;
 
 requies
+    XML::Hash => 0,
+    Hash::AsObject => 0,
     Moose => 0,
     MooseX::ClassAttribute => 0.13,
     LWP::UserAgent => 0,
