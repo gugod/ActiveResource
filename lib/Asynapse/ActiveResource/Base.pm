@@ -14,14 +14,6 @@ class_has 'password' => (is => "rw", isa => "Str");
 
 has '_field_attributes' => (is => "rw", isa => "HashRef");
 
-around BUILDARGS => sub {
-    my $orig  = shift;
-    my $class = shift;
-    my %args  = @_;
-
-    $class->$orig(%args);
-};
-
 sub find {
     my ($class, $id) = @_;
 
