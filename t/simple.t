@@ -16,6 +16,13 @@ use Test::More;
 
 my $issue = Issue->find(1);
 
+is ref($issue), "Issue";
+
 is $issue->id, 1;
+
+# These should have defined values.
+ok defined $issue->subject;
+ok defined $issue->status->id;
+ok defined $issue->status->name;
 
 done_testing;
