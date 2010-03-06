@@ -62,6 +62,24 @@ sub load_attributes_from_response {
     return $self;
 }
 
+sub collection_path {
+    my ($class, $prefix_options, $query_options) = @_;
+    my $resource_name = PL lc $class;
+    my $path = "/${resource_name}.xml";
+    if ($prefix_options) {
+        my ($k, $v) = each %$prefix_options;
+        $k =~ s/_id$//s;
+        my $prefix_resource_name = PL lc $k;
+        $path = "/${prefix_resource_name}/${v}" . $path;
+    }
+    if ($query_options) {
+        my $u = URI->new;
+        $u->query_form(%$query_options);
+        $path = $path . $u->as_string
+    }
+    return $path;
+}
+
 sub AUTOLOAD {
     no strict;
     local $, = ", ";
