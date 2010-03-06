@@ -1,6 +1,5 @@
 package ActiveResource::Base;
-use Moose;
-use MooseX::ClassAttribute;
+use parent qw(Class::Data::Inheritable);
 
 use Lingua::EN::Inflect qw(PL);
 use LWP::UserAgent;
@@ -8,11 +7,12 @@ use URI;
 use XML::Hash;
 use Hash::AsObject;
 
-class_has 'site' => (is => "rw", isa => "Str");
-class_has 'user' => (is => "rw", isa => "Str");
-class_has 'password' => (is => "rw", isa => "Str");
+__PACKAGE__->mk_classdata($_) for qw(site user password);
 
-has '_field_attributes' => (is => "rw", isa => "HashRef");
+sub new {
+    my $class = shift;
+    return bless {}, $class;
+}
 
 sub find {
     my ($class, $id) = @_;
@@ -58,7 +58,8 @@ sub load_attributes_from_response {
     my $xc = XML::Hash->new();
     my $hash = $xc->fromXMLStringtoHash($record_xml);
     my ($key, $value) = each %$hash;
-    $self->_field_attributes($value);
+    $self->{_field_attributes} = $value;
+
     return $self;
 }
 
@@ -87,7 +88,7 @@ sub AUTOLOAD {
     my @args = @_;
     my ($sub) = ${__PACKAGE__."::AUTOLOAD"} =~ /::(.+?)$/;
 
-    my $attr = $self->_field_attributes->{$sub};
+    my $attr = $self->{_field_attributes}{$sub};
 
     return $attr if !ref $attr;
     return $attr->{text} if $attr->{text};

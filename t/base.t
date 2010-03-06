@@ -24,8 +24,6 @@ subtest "Stuff->site is default to be the same as ActiveResource::Base->site" =>
 };
 
 subtest "Stuff->site can be overrided without effecting the value of ActiveResource::Base->site" => sub {
-    local $TODO = "Make ->site overridable.";
-
     Stuff->site("http://example2.com");
     ok(ActiveResource::Base->site ne Stuff->site);
     is(ActiveResource::Base->site, "http://example.com");

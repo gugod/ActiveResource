@@ -1,10 +1,10 @@
 #!/usr/bin/env perl
+use common::sense;
+
 package Issue;
-use Moose;
-extends 'ActiveResource::Base';
+use parent 'ActiveResource::Base';
 
 package main;
-use strict;
 use Test::More;
 
 for my $method (qw(site user password)) {
