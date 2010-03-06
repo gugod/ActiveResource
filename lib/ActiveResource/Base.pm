@@ -42,6 +42,14 @@ sub find {
     return $record;
 }
 
+sub create {
+    print "XXX";
+}
+
+sub save {
+    print "XXX";
+}
+
 sub load_attributes_from_response {
     my $self = shift;
     my $response = shift;
