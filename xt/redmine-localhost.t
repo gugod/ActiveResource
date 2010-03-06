@@ -1,13 +1,12 @@
 #!/usr/bin/env perl
-use Asynapse::ActiveResource::Base;
-
 package Project;
-use parent 'Asynapse::ActiveResource::Base';
+use parent 'ActiveResource::Base';
 
 package Issue;
-use parent 'Asynapse::ActiveResource::Base';
+use parent 'ActiveResource::Base';
 
 package main;
+use common::sense;
 use Test::More;
 
 for(qw(Project Issue)) {

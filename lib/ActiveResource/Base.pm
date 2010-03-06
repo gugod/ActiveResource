@@ -1,4 +1,4 @@
-package Asynapse::ActiveResource::Base;
+package ActiveResource::Base;
 use Moose;
 use MooseX::ClassAttribute;
 

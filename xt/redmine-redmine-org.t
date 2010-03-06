@@ -1,15 +1,13 @@
 #!/usr/bin/env perl
-use Asynapse::ActiveResource::Base;
-
 package Project;
-use Moose;
-extends 'Asynapse::ActiveResource::Base';
+use parent 'ActiveResource::Base';
 
 package Issue;
-use Moose;
-extends 'Asynapse::ActiveResource::Base';
+use parent 'ActiveResource::Base';
 
 package main;
+use common::sense;
+
 use Test::More;
 
 Project->site("http://www.redmine.org");

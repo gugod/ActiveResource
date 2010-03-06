@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-package Issue;
+package Stuff;
 use Moose;
 extends 'ActiveResource::Base';
 
@@ -7,8 +7,9 @@ package main;
 use strict;
 use Test::More;
 
-for my $method (qw(site user password)) {
-    ok(Issue->can($method));
+# Class methods
+for my $method (qw(new site user password find create)) {
+    ok(Stuff->can($method));
 }
 
 done_testing;
