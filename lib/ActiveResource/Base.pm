@@ -1,18 +1,14 @@
 package ActiveResource::Base;
-use parent qw(Class::Data::Inheritable);
-
-use Lingua::EN::Inflect qw(PL);
+use common::sense;
+use parent qw(Hash::AsObject Class::Data::Inheritable);
 use LWP::UserAgent;
+use Lingua::EN::Inflect qw(PL);
 use URI;
 use XML::Hash;
-use Hash::AsObject;
+
+use namespace::clean;
 
 __PACKAGE__->mk_classdata($_) for qw(site user password);
-
-sub new {
-    my $class = shift;
-    return bless {}, $class;
-}
 
 sub find {
     my ($class, $id) = @_;
@@ -31,10 +27,9 @@ sub find {
     }
 
     my $ua = LWP::UserAgent->new;
-    my $request = HTTP::Request->new("GET", $url);
-    my $response = $ua->request($request);
+    my $response = $ua->get($url);
     unless ($response->is_success) {
-        die "FAIL";
+        die "${class}->find FAIL. With HTTP Status: @{[ $response->status_line ]}\n";
     }
 
     my $record = $class->new;
@@ -48,37 +43,6 @@ sub create {
 
 sub save {
     print "XXX";
-}
-
-sub load_attributes_from_response {
-    my $self = shift;
-    my $response = shift;
-    my $record_xml = $response->content;
-
-    my $xc = XML::Hash->new();
-    my $hash = $xc->fromXMLStringtoHash($record_xml);
-    my ($key, $value) = each %$hash;
-    $self->{_field_attributes} = $value;
-
-    return $self;
-}
-
-sub collection_path {
-    my ($class, $prefix_options, $query_options) = @_;
-    my $resource_name = PL lc $class;
-    my $path = "/${resource_name}.xml";
-    if ($prefix_options) {
-        my ($k, $v) = each %$prefix_options;
-        $k =~ s/_id$//s;
-        my $prefix_resource_name = PL lc $k;
-        $path = "/${prefix_resource_name}/${v}" . $path;
-    }
-    if ($query_options) {
-        my $u = URI->new;
-        $u->query_form(%$query_options);
-        $path = $path . $u->as_string
-    }
-    return $path;
 }
 
 sub AUTOLOAD {
@@ -95,5 +59,41 @@ sub AUTOLOAD {
     return Hash::AsObject->new($attr);
 }
 
+sub collection_path {
+    my ($class, $prefix_options, $query_options) = @_;
+    my $resource_name = PL lc(ref($class) || $class);
+    my $path = "/${resource_name}.xml";
+    if ($prefix_options) {
+        my ($k, $v) = each %$prefix_options;
+        $k =~ s/_id$//s;
+        my $prefix_resource_name = PL lc $k;
+        $path = "/${prefix_resource_name}/${v}" . $path;
+    }
+    if ($query_options) {
+        my $u = URI->new;
+        $u->query_form(%$query_options);
+        $path = $path . $u->as_string
+    }
+    return $path;
+}
+
+no namespace::clean;
+# protected methods start from here
+
+sub load_attributes_from_response {
+    my $self = shift;
+    my $response = shift;
+    my $record_xml = $response->content;
+
+    my $xc = XML::Hash->new();
+    my $hash = $xc->fromXMLStringtoHash($record_xml);
+    my ($key, $value) = each %$hash;
+    $self->{_field_attributes} = $value;
+
+    return $self;
+}
+
+# end of protected methods
+use namespace::clean;
 
 1;
