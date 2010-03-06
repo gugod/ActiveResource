@@ -9,7 +9,7 @@ use Test::More;
 
 # Class methods
 for my $method (qw(new site user password find create)) {
-    ok(Stuff->can($method));
+    ok(Stuff->can($method), "There is a Stuff->$method");
 }
 
 done_testing;
