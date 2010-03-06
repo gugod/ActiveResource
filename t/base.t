@@ -48,4 +48,15 @@ subtest "Stuff->collection_path", sub {
     done_testing;
 };
 
+subtest "Stuff instances", sub {
+    my $o = Stuff->new;
+    ok($o->can("attributes"), "Stuff#attributes");
+    ok($o->can("load"),       "Stuff#load");
+
+    $o->load({ description => "OHAI" });
+    is($o->description, "OHAI");
+
+    done_testing;
+};
+
 done_testing;

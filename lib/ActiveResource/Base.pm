@@ -1,14 +1,14 @@
 package ActiveResource::Base;
 use common::sense;
-use parent qw(Hash::AsObject Class::Data::Inheritable);
+use parent qw(Hash::AsObject Class::Accessor::Lvalue::Fast Class::Data::Inheritable);
+use Hash::AsObject;
 use LWP::UserAgent;
 use Lingua::EN::Inflect qw(PL);
 use URI;
 use XML::Hash;
 
-use namespace::clean;
-
 __PACKAGE__->mk_classdata($_) for qw(site user password);
+__PACKAGE__->mk_accessors(qw(attributes));
 
 sub find {
     my ($class, $id) = @_;
@@ -45,20 +45,6 @@ sub save {
     print "XXX";
 }
 
-sub AUTOLOAD {
-    no strict;
-    local $, = ", ";
-    my $self = shift;
-    my @args = @_;
-    my ($sub) = ${__PACKAGE__."::AUTOLOAD"} =~ /::(.+?)$/;
-
-    my $attr = $self->{_field_attributes}{$sub};
-
-    return $attr if !ref $attr;
-    return $attr->{text} if $attr->{text};
-    return Hash::AsObject->new($attr);
-}
-
 sub collection_path {
     my ($class, $prefix_options, $query_options) = @_;
     my $resource_name = PL lc(ref($class) || $class);
@@ -77,23 +63,30 @@ sub collection_path {
     return $path;
 }
 
-no namespace::clean;
-# protected methods start from here
-
-sub load_attributes_from_response {
-    my $self = shift;
-    my $response = shift;
-    my $record_xml = $response->content;
-
-    my $xc = XML::Hash->new();
-    my $hash = $xc->fromXMLStringtoHash($record_xml);
-    my ($key, $value) = each %$hash;
-    $self->{_field_attributes} = $value;
-
+sub load {
+    my ($self, $attr) = @_;
+    my $a = {};
+    while(my($name, $value) = each %$attr) {
+        $a->{$name} = !ref($value) ? $value : $value->{text} || Hash::AsObject->new($value);
+        $self->{$name} = $a->{$name};
+    }
+    $self->attributes = $a;
     return $self;
 }
 
+# protected methods start from here
+
+sub load_attributes_from_response {
+    my ($self, $response) = @_;
+
+    my $record_xml = $response->content;
+    my $xc = XML::Hash->new();
+    my $hash = $xc->fromXMLStringtoHash($record_xml);
+    my (undef, $attr) = each %$hash;
+
+    $self->load($attr);
+}
+
 # end of protected methods
-use namespace::clean;
 
 1;
