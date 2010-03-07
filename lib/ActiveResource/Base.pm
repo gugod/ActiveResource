@@ -2,13 +2,20 @@ package ActiveResource::Base;
 use common::sense;
 use parent qw(Class::Accessor::Lvalue::Fast Class::Data::Inheritable);
 use Hash::AsObject;
-use LWP::UserAgent;
 use Lingua::EN::Inflect qw(PL);
 use URI;
-use XML::Hash;
+use ActiveResource::Connection;
 
 __PACKAGE__->mk_classdata($_) for qw(site user password);
 __PACKAGE__->mk_accessors(qw(attributes));
+
+__PACKAGE__->mk_classdata(
+    format => 'ActiveResource::Formats::XmlFormat'
+);
+
+__PACKAGE__->mk_classdata(
+    connection => ActiveResource::Connection->new
+);
 
 sub find {
     my ($class, $id) = @_;
@@ -26,8 +33,7 @@ sub find {
         $url = "$x";
     }
 
-    my $ua = LWP::UserAgent->new;
-    my $response = $ua->get($url);
+    my $response = connection->get($url);
     unless ($response->is_success) {
         die "${class}->find FAIL. With HTTP Status: @{[ $response->status_line ]}\n";
     }
@@ -91,6 +97,11 @@ sub load {
     return $self;
 }
 
+sub encode {
+    my ($self) = @_;
+    $self->format->encode($self->attributes);
+}
+
 sub AUTOLOAD {
     no strict;
     local $, = ", ";
@@ -99,7 +110,7 @@ sub AUTOLOAD {
     my ($sub) = ${__PACKAGE__."::AUTOLOAD"} =~ /::(.+?)$/;
 
     if (@args == 1) {
-        $self->attributes->{$sub} = $args[0];
+        $self->attributes->{$sub} = ref($args[0]) ? $args[0] : { text => $args[0] };
         return $self;
     }
 
@@ -116,8 +127,7 @@ sub load_attributes_from_response {
     my ($self, $response) = @_;
 
     my $record_xml = $response->content;
-    my $xc = XML::Hash->new();
-    my $hash = $xc->fromXMLStringtoHash($record_xml);
+    my $hash = $self->format->decode($record_xml);
     my (undef, $attr) = each %$hash;
 
     $self->load($attr);

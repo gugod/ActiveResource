@@ -8,7 +8,7 @@ package main;
 use Test::More;
 
 subtest "Stuff should respond to certain class methods" => sub {
-    for my $method (qw(new site user password find create)) {
+    for my $method (qw(new site user password find create connection)) {
         ok(Stuff->can($method), "There is a Stuff->$method");
     }
 
