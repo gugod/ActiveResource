@@ -1,6 +1,6 @@
 package ActiveResource::Base;
 use common::sense;
-use parent qw(Hash::AsObject Class::Accessor::Lvalue::Fast Class::Data::Inheritable);
+use parent qw(Class::Accessor::Lvalue::Fast Class::Data::Inheritable);
 use Hash::AsObject;
 use LWP::UserAgent;
 use Lingua::EN::Inflect qw(PL);
@@ -49,6 +49,24 @@ sub collection_path {
     my ($class, $prefix_options, $query_options) = @_;
     my $resource_name = PL lc(ref($class) || $class);
     my $path = "/${resource_name}.xml";
+    if ($prefix_options) {
+        my ($k, $v) = each %$prefix_options;
+        $k =~ s/_id$//s;
+        my $prefix_resource_name = PL lc $k;
+        $path = "/${prefix_resource_name}/${v}" . $path;
+    }
+    if ($query_options) {
+        my $u = URI->new;
+        $u->query_form(%$query_options);
+        $path = $path . $u->as_string
+    }
+    return $path;
+}
+
+sub element_path {
+    my ($class, $id, $prefix_options, $query_options) = @_;
+    my $resource_name = PL lc(ref($class) || $class);
+    my $path = "/${resource_name}/${id}.xml";
     if ($prefix_options) {
         my ($k, $v) = each %$prefix_options;
         $k =~ s/_id$//s;

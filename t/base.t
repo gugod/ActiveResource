@@ -48,6 +48,24 @@ subtest "Stuff->collection_path", sub {
     done_testing;
 };
 
+subtest "Stuff->element_path", sub {
+    is(Stuff->element_path(42), "/stuffs/42.xml", "with the arg id");
+
+    is(
+        Stuff->element_path(42, { user_id => 3 }),
+        "/users/3/stuffs/42.xml",
+        "prefixed /users/3"
+    );
+
+    is(
+        Stuff->element_path(42, { user_id => 3 }, { tags => "foo bar" }),
+        "/users/3/stuffs/42.xml?tags=foo+bar",
+        "prefixed /users/3 with extra query parameters"
+    );
+
+    done_testing;
+};
+
 subtest "Stuff instances", sub {
     my $o = Stuff->new;
     ok($o->can("attributes"), "Stuff#attributes");
