@@ -33,19 +33,13 @@ sub get {
     return ua->get($url);
 }
 
-use YAML;
-
 sub post {
     my ($self, $path, $body) = @_;
     my $url = $self->url($path);
 
-    print STDERR "URL: $url\n";
     my $request = HTTP::Request->new("POST", $url);
     $request->header("Content-Type" => "text/xml");
     $request->content($body);
-
-    print STDERR YAML::Dump($request);
-
     return ua->request($request);
 }
 
