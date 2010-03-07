@@ -68,10 +68,28 @@ sub load {
     my $a = {};
     while(my($name, $value) = each %$attr) {
         $a->{$name} = !ref($value) ? $value : $value->{text} || Hash::AsObject->new($value);
-        $self->{$name} = $a->{$name};
     }
     $self->attributes = $a;
     return $self;
+}
+
+sub AUTOLOAD {
+    no strict;
+    local $, = ", ";
+    my $self = shift;
+    my @args = @_;
+    my ($sub) = ${__PACKAGE__."::AUTOLOAD"} =~ /::(.+?)$/;
+
+    if (@args == 1) {
+        $self->attributes->{$sub} = $args[0];
+        return $self;
+    }
+
+    my $attr = $self->attributes->{$sub};
+
+    return $attr if !ref $attr;
+    return $attr->{text} if $attr->{text};
+    return Hash::AsObject->new($attr);
 }
 
 # protected methods start from here

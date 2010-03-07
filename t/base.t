@@ -54,7 +54,14 @@ subtest "Stuff instances", sub {
     ok($o->can("load"),       "Stuff#load");
 
     $o->load({ description => "OHAI" });
-    is($o->description, "OHAI");
+
+    subtest "attribute names are accessor methods", sub {
+        is($o->description, "OHAI");
+        $o->description("OHAI2");
+        is($o->description, "OHAI2");
+
+        done_testing;
+    };
 
     done_testing;
 };
