@@ -5,6 +5,7 @@ use Hash::AsObject;
 use Lingua::EN::Inflect qw(PL);
 use URI;
 use ActiveResource::Connection;
+use ActiveResource::Formats::XmlFormat;
 
 __PACKAGE__->mk_classdata($_) for qw(site user password);
 __PACKAGE__->mk_accessors(qw(attributes));
@@ -20,20 +21,10 @@ __PACKAGE__->mk_classdata(
 sub find {
     my ($class, $id) = @_;
 
-    my $resource_name = PL lc $class;
-    my $site = $class->site;
-    my $user = $class->user;
-    my $pass = $class->password;
+    $class->connection->$_ = $class->$_ for qw(site user password);
 
-    my $url  = "${site}/${resource_name}/${id}.xml";
-
-    if ($user && $pass) {
-        my $x = URI->new($url);
-        $x->userinfo("${user}:${pass}");
-        $url = "$x";
-    }
-
-    my $response = connection->get($url);
+    my $path = $class->element_path($id);
+    my $response = $class->connection->get($path);
     unless ($response->is_success) {
         die "${class}->find FAIL. With HTTP Status: @{[ $response->status_line ]}\n";
     }
@@ -44,7 +35,20 @@ sub find {
 }
 
 sub create {
-    print "XXX";
+    my ($class, %args) = @_;
+    my $resource_name = lc($class);
+    $class->connection->$_ = $class->$_ for qw(site user password);
+
+    my $body = $class->format->encode({ $resource_name => \%args });
+
+    my $response = $class->connection->post($class->collection_path, $body);
+    unless ($response->is_success) {
+        die "${class}->create FAIL. With HTTP Status: @{[ $response->status_line ]}\n";
+    }
+
+    my $record = $class->new;
+    $record->load_attributes_from_response($response);
+    return $record;
 }
 
 sub save {
@@ -107,6 +111,9 @@ sub AUTOLOAD {
     local $, = ", ";
     my $self = shift;
     my @args = @_;
+
+    return unless ($self->attributes);
+
     my ($sub) = ${__PACKAGE__."::AUTOLOAD"} =~ /::(.+?)$/;
 
     if (@args == 1) {
@@ -115,7 +122,6 @@ sub AUTOLOAD {
     }
 
     my $attr = $self->attributes->{$sub};
-
     return $attr if !ref $attr;
     return $attr->{text} if $attr->{text};
     return Hash::AsObject->new($attr);

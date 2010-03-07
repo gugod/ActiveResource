@@ -9,26 +9,38 @@ package main;
 use common::sense;
 use Test::More;
 
-for(qw(Project Issue)) {
-    $_->site("http://localhost:3000");
-    $_->user("admin");
-    $_->password("admin");
-}
+ActiveResource::Base->site("http://localhost:3000");
+ActiveResource::Base->user("admin");
+ActiveResource::Base->password("admin");
 
-my $project = Project->find(1);
-is $project->name, "test";
+subtest "Some simple matter of finding" => sub {
+    my $project = Project->find(1);
+    is $project->name, "test";
 
-my $issue = Issue->find(1);
-is $issue->id, 1;
-is $issue->project->id, 1;
-is $issue->project->name, "test";
-is $issue->status->name, "Resolved";
+    my $issue = Issue->find(1);
+    is $issue->id, 1;
+    is $issue->project->id, 1;
+    is $issue->project->name, "test";
+    is $issue->status->name, "Resolved";
+    ok $issue->can('save');
+    done_testing;
+};
 
-ok $issue->can('save');
+subtest "Creating new issues" => sub {
+    my $issue = Issue->create(
+        project => { id => 1 },
+        subject => "Created from $$, " . __FILE__,
+    );
 
-{
-    local $TODO = "Feature: lvalue attribute setter and saving.";
+    like($issue->id, /^\d+$/);
+    like($issue->subject, /^Created from \d+,/);
 
+    done_testing;
+};
+
+
+subtest "lvalue attribute setter and saving" => sub {
+    my $issue = Issue->find(1);
     my $old_description = $issue->description;
     my $new_description = "Shiny new description. $$";
     $issue->description = $new_description;
@@ -45,6 +57,9 @@ ok $issue->can('save');
     $issue->save;
 
     is $issue->description, $new_description;
-}
+
+    done_testing;
+};
+
 
 done_testing;
