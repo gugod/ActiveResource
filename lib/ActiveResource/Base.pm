@@ -52,7 +52,29 @@ sub create {
 }
 
 sub save {
-    print "XXX";
+    my ($self) = @_;
+    my $class = ref($self);
+
+    my $resource_name = lc($class);
+    $class->connection->$_ = $class->$_ for qw(site user password);
+
+    my $body = $class->format->encode({ $resource_name => $self->attributes });
+
+    my $response;
+    if ($self->id) {
+        $response = $class->connection->put($class->element_path($self->id), $body);
+    }
+    else {
+        $response = $class->connection->post($class->collection_path, $body);
+    }
+
+    unless ($response->is_success) {
+        die "${class}->save FAIL. With HTTP Status: @{[ $response->status_line ]}\n";
+    }
+
+    $self->load_attributes_from_response($response);
+
+    return $self;
 }
 
 sub collection_path {
@@ -112,9 +134,9 @@ sub AUTOLOAD {
     my $self = shift;
     my @args = @_;
 
-    return unless ($self->attributes);
-
     my ($sub) = ${__PACKAGE__."::AUTOLOAD"} =~ /::(.+?)$/;
+
+    $self->attributes = {} unless $self->attributes;
 
     if (@args == 1) {
         $self->attributes->{$sub} = ref($args[0]) ? $args[0] : { text => $args[0] };
@@ -131,11 +153,12 @@ sub AUTOLOAD {
 
 sub load_attributes_from_response {
     my ($self, $response) = @_;
-
     my $record_xml = $response->content;
+
+    return unless $record_xml;
+
     my $hash = $self->format->decode($record_xml);
     my (undef, $attr) = each %$hash;
-
     $self->load($attr);
 }
 

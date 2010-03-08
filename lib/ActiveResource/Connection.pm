@@ -43,4 +43,14 @@ sub post {
     return ua->request($request);
 }
 
+sub put {
+    my ($self, $path, $body) = @_;
+    my $url = $self->url($path);
+
+    my $request = HTTP::Request->new("PUT", $url);
+    $request->header("Content-Type" => "text/xml");
+    $request->content($body);
+    return ua->request($request);
+}
+
 1;
