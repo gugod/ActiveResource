@@ -2,7 +2,7 @@ ActiveResource
 ==============
 
 This module implements
-[ActieResource](http://github.com/rails/rails/tree/master/activeresource)
+[ActiveResource](http://github.com/rails/rails/tree/master/activeresource)
 in Perl. So youn can use Perl to interact with some Rails web apps.
 
 INSTALLATION
