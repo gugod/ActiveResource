@@ -2,7 +2,7 @@ use inc::Module::Install;
 
 all_from 'lib/ActiveResource.pm';
 
-requies
+requires
     parent                   => 0,
     Class::Accessor::Lvalue  => 0,
     Class::Data::Inheritable => 0,
@@ -13,6 +13,6 @@ requies
     URI                      => 0;
 
 tests 't/*.t';
-authro_tests 'xt/*.t';
+author_tests 'xt/*.t';
 
 WriteAll;
