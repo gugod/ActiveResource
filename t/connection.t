@@ -8,6 +8,6 @@ use ActiveResource::Connection;
 
 my $conn = ActiveResource::Connection->new;
 
-ok($conn->can($_)) for qw(get post head);
+ok($conn->can($_)) for qw(get post put);
 
 done_testing;
