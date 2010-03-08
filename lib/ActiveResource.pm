@@ -1,5 +1,5 @@
 package ActiveResource;
-our $VERSOIN = "0.01";
+our $VERSION = "0.01";
 1;
 
 __END__
