@@ -3,6 +3,7 @@ use inc::Module::Install;
 all_from 'lib/ActiveResource.pm';
 
 requires
+    common::sense            => 0,
     parent                   => 0,
     Class::Accessor::Lvalue  => 0,
     Class::Data::Inheritable => 0,
