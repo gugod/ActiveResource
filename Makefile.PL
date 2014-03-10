@@ -13,6 +13,8 @@ requires
     'Lingua::EN::Inflect'      => 0,
     'URI'                      => 0;
 
+repository 'https://github.com/gugod/ActiveResource';
+
 tests 't/*.t';
 author_tests 'xt/*.t';
 
