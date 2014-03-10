@@ -4,9 +4,9 @@ our $VERSION = "0.01";
 
 __END__
 
-=head1 ActiveResource
+=head1 NAME
 
-ActiveResource - Implemented in Perl.
+ActiveResource - Ruby on Rails ActiveResource in Perl
 
 =head1 VERSION
 

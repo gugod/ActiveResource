@@ -1,3 +1,10 @@
-0.01:
-- Initial release. Implement Base#find(id) and Base#save.
+Revision History for Perl module ActiveResource
+
+0.02 2014-03-
+    - Added abstract to pod
+    - Added github repo to metadata via Makefile.PL
+    - Fixed up Makefile.PL by quoting module names
+
+0.01 2010-03-07
+    - Initial release to CPAN: Implement Base#find(id) and Base#save.
 
